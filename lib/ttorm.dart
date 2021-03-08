@@ -1,11 +1,9 @@
-
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 
 class Ttorm {
-  static const MethodChannel _channel =
-      const MethodChannel('ttorm');
+  static const MethodChannel _channel = const MethodChannel('ttorm');
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');
