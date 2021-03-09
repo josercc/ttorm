@@ -19,10 +19,25 @@ public class TtormRegister {
     ///   - identifier: 注册的唯一标识符 可以不传递 默认为`controller`的类名称
     public static func register<T:Ttorm>(_ controller:T.Type, _ identifier:String? = nil) {
         let ttormIdentifier = identifier ?? "\(controller)"
-        let makeControllerHandle:(TtormGetModelHandle) = { parameter in
-            return T.ttormMakeController(parameter: parameter)
+        guard let channel = SwiftTtormPlugin.ttormMethodChannel else {
+            assert(false,"Tormmethodchannel cannot be empty")
+            return
         }
-        registerMap[ttormIdentifier] = makeControllerHandle
+        /// 获取Flutter已经注册的路由
+        channel.invokeMethod(TtormMethodName.getAllRegisterIdentifiers.rawValue, arguments: nil) { result in
+            guard let identifiers = result as? [String] else {
+                assert(false,"\(TtormMethodName.getAllRegisterIdentifiers.rawValue)The return value is not of type [string]")
+                return
+            }
+            guard !identifiers.contains(ttormIdentifier) else {
+                assert(false,"\(ttormIdentifier)registered on the flutter side")
+                return
+            }
+            let makeControllerHandle:(TtormGetModelHandle) = { parameter in
+                return T.ttormMakeController(parameter: parameter)
+            }
+            registerMap[ttormIdentifier] = makeControllerHandle
+        }
     }
     
     public static func getController(_ identifier:String, _ parameter:TtormParameter) -> UIViewController? {
@@ -30,6 +45,10 @@ public class TtormRegister {
             return nil
         }
         return handle(parameter)
+    }
+    
+    public static var allRegisterIdentifiers:[String] {
+        return registerMap.map({$0.key})
     }
 }
 

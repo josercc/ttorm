@@ -9,7 +9,7 @@ import Foundation
 /// 模块跳转传递的参数
 public class TtormParameter {
     
-    private let parameter:[String:Any]
+    public let parameter:[String:Any]
     
     /// 初始化
     /// - Parameter parameter: 模块化传递过来的参数
@@ -27,6 +27,16 @@ public class TtormParameter {
         }
         self.parameter = map
     }
+    
+    public init(_ json:String) {
+        guard let data = json.data(using: .utf8),
+              let map = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any] else {
+            self.parameter = [:]
+            return
+        }
+        self.parameter = map
+    }
+    
     
     /// 将模块化的参数转换为我们需要的模型
     /// - Returns: 需要的模型
@@ -48,5 +58,13 @@ public class TtormParameter {
     
     subscript<T>(key:String, defaultValue:T) -> T {
         return self[key] ?? defaultValue
+    }
+    
+    public func toJSON() -> String? {
+        guard let data = try? JSONSerialization.data(withJSONObject: parameter, options: .fragmentsAllowed),
+              let jsonText = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        return jsonText
     }
 }

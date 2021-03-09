@@ -11,4 +11,9 @@ public protocol Ttorm {
     /// 创建对应组件的`UIViewController`
     /// - Parameter parameter: 模块传递过来的参数
     static func ttormMakeController(parameter:TtormParameter) -> UIViewController?
+    
+    /// Ttorm框架对应页面的方法通道
+    /// - Parameter channel: 方法通道
+    func ttormMethodChannel(channel:FlutterMethodChannel)
 }
+
