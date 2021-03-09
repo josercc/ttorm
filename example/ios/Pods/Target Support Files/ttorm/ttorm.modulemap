@@ -1,6 +1,0 @@
-framework module ttorm {
-  umbrella header "ttorm-umbrella.h"
-
-  export *
-  module * { export * }
-}
