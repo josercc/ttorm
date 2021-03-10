@@ -3,8 +3,7 @@ class TtormParameter {
   TtormParameter(this.parameter);
   TtormParameter.empty() : this.parameter = {};
   TtormParameter.fromDynamicMap(Map<dynamic, dynamic> map)
-      : this.parameter =
-            map.map((key, value) => MapEntry(key.toString(), value));
+      : this.parameter = map.map((key, value) => MapEntry(key.toString(), value));
 
   T? get<T>(String key) {
     dynamic? value = parameter[key];
