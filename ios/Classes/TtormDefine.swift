@@ -8,4 +8,3 @@
 import Foundation
 
 let ttormFlutterEngineGroup = FlutterEngineGroup(name: "ttormFlutterEngineGroup", project: nil)
-let ttormRunEngine = "ttormRunEngine"

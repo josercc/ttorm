@@ -13,7 +13,7 @@ public class TtormParameter {
     
     /// 初始化
     /// - Parameter parameter: 模块化传递过来的参数
-    public init(_ parameter:[String:Any]) {
+    public init(_ parameter:[String:Any] = [:]) {
         self.parameter = parameter
     }
     

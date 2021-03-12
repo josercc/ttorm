@@ -9,8 +9,8 @@ import Foundation
 
 public enum TtormMethodName:String {
     /// 获取Flutter端已经注册的路由列表
-    case getAllRegisterIdentifiers = "get_all_register_identifiers"
     case push = "push"
     case pop = "pop"
     case runFlutterView = "runFlutterView"
+    case getValue = "getValue"
 }

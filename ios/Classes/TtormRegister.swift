@@ -11,44 +11,52 @@ public class TtormRegister {
     /// 获取模块的定义回掉
     public typealias TtormGetModelHandle = (TtormParameter) -> UIViewController?
     /// 注册在原生的路由表
-    static private var registerMap:[String:TtormGetModelHandle] = [:]
+    private var registerMap:[String:TtormGetModelHandle] = [:]
     
     /// 注册路由表
     /// - Parameters:
     ///   - controller: 注册的UIViewController
     ///   - identifier: 注册的唯一标识符 可以不传递 默认为`controller`的类名称
-    public static func register<T:Ttorm>(_ controller:T.Type, _ identifier:String? = nil) {
-        let ttormIdentifier = identifier ?? "\(controller)"
-        guard let channel = SwiftTtormPlugin.ttormMethodChannel else {
-            assert(false,"Tormmethodchannel cannot be empty")
+    public func register<T:TtormModule>(_ controller:T.Type, _ identifier:TtormIdentifier? = nil) {
+        let ttormIdentifier = (identifier != nil) ? identifier!.identifier : "\(controller)"
+        /// 获取Flutter端已经注册路由
+        let flutterModuleIdentifiers = UserDefaults.standard.object(forKey: "flutterModuleIdentifiers") as? [String] ?? []
+        guard !flutterModuleIdentifiers.contains(ttormIdentifier) else {
+            assert(false,"\(ttormIdentifier)registered on the flutter side")
             return
         }
-        /// 获取Flutter已经注册的路由
-        channel.invokeMethod(TtormMethodName.getAllRegisterIdentifiers.rawValue, arguments: nil) { result in
-            guard let identifiers = result as? [String] else {
-                assert(false,"\(TtormMethodName.getAllRegisterIdentifiers.rawValue)The return value is not of type [string]")
-                return
+        let makeControllerHandle:(TtormGetModelHandle) = { parameter in
+            return T.ttormMakeController(parameter: parameter)
+        }
+        self.registerMap[ttormIdentifier] = makeControllerHandle
+        UserDefaults.standard.setValue(self.allRegisterIdentifiers, forKey: "appModelIdentifiers")
+        UserDefaults.standard.synchronize()
+    }
+    
+    public func getController(_ identifier:TtormIdentifier, _ parameter:TtormParameter) -> UIViewController? {
+        if allRegisterIdentifiers.contains(identifier.identifier) {
+            guard let handle = self.registerMap[identifier.identifier] else {
+                assert(false,"\(identifier.identifier)没有注册")
+                return nil
             }
-            guard !identifiers.contains(ttormIdentifier) else {
-                assert(false,"\(ttormIdentifier)registered on the flutter side")
-                return
-            }
-            let makeControllerHandle:(TtormGetModelHandle) = { parameter in
-                return T.ttormMakeController(parameter: parameter)
-            }
-            registerMap[ttormIdentifier] = makeControllerHandle
+            return handle(parameter)
+        } else {
+            let route = "/\(identifier.identifier)?arguments=\(parameter.toJSON() ?? "")"
+            let engine = ttormFlutterEngineGroup.makeEngine(withEntrypoint: "main", libraryURI: nil)
+            engine.run(withEntrypoint: nil, initialRoute: "/APage")
+            let flutterController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
+//            flutterController.pushRoute("/APage")
+            Ttorm.manager.ttormChannel = FlutterMethodChannel(name: "Ttorm", binaryMessenger: flutterController.binaryMessenger)
+            return flutterController
         }
     }
     
-    public static func getController(_ identifier:String, _ parameter:TtormParameter) -> UIViewController? {
-        guard let handle = registerMap[identifier] else {
-            return nil
-        }
-        return handle(parameter)
+    public var allRegisterIdentifiers:[String] {
+        return self.registerMap.map({$0.key})
     }
     
-    public static var allRegisterIdentifiers:[String] {
-        return registerMap.map({$0.key})
+    public var flutterModuleIdentifiers:[String] {
+        return UserDefaults.standard.object(forKey: "flutterModuleIdentifiers") as? [String] ?? []
     }
 }
 

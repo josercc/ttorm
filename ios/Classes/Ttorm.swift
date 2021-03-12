@@ -2,18 +2,48 @@
 //  Ttorm.swift
 //  ttorm
 //
-//  Created by 张行 on 2021/3/8.
+//  Created by 张行 on 2021/3/11.
 //
 
 import Foundation
-/// 模块化需要实现的协议
-public protocol Ttorm {
-    /// 创建对应组件的`UIViewController`
-    /// - Parameter parameter: 模块传递过来的参数
-    static func ttormMakeController(parameter:TtormParameter) -> UIViewController?
-    
-    /// Ttorm框架对应页面的方法通道
-    /// - Parameter channel: 方法通道
-    func ttormMethodChannel(channel:FlutterMethodChannel)
-}
 
+public class Ttorm {
+    public static let manager = Ttorm()
+    public let register:TtormRegister
+    
+    public var ttormChannel:FlutterMethodChannel? {
+        didSet {
+//            ttormChannel?.setMethodCallHandler({ (call, result) in
+//                if call.method == "getValue" {
+//                    if let arguments = call.arguments as? String {
+//                        let parameter = TtormParameter(arguments)
+//                        if let key:String = parameter["key"]  {
+//                            result(UserDefaults.standard.object(forKey: key))
+//                        } else {
+//                            result(nil)
+//                        }
+//                    } else {
+//                        result(nil)
+//                    }
+//                } else {
+//                    result(FlutterMethodNotImplemented)
+//                }
+//            })
+        }
+    }
+    
+    private init() {
+        self.register = TtormRegister()
+    }
+    
+    public func initRoute(_ registerHandle:@escaping((TtormRegister) -> Void)) {
+        registerHandle(self.register)
+    }
+    
+    public func runApp(root:TtormIdentifier, parameter:TtormParameter = TtormParameter(), handle:((UIViewController) -> Void)) {
+        guard let rootController = register.getController(root, parameter) else {
+            assert(false,"\(root.identifier)没有注册")
+        }
+        handle(rootController)
+    }
+}

@@ -5,20 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:ttorm/ttorm.dart';
 import 'package:ttorm/ttorm_identifier.dart';
 import 'package:ttorm/ttorm_parameter.dart';
-import 'package:ttorm/ttorm_register.dart';
 
+/// Flutter的路由跳转
 class TtormNavigator {
+  /// Push进行跳转
+  /// - `identifier`: 模块跳转的标识符
+  /// - `context`: 当前页面
+  /// - `parameter`: 跳转的参数
+  /// - `animation`: 是否有动画
   static void push(
     TtormIdentifier identifier,
     BuildContext context, {
     TtormParameter? parameter,
     bool animation = true,
-    bool isFromFlutter = true,
   }) async {
-    StatefulWidget? page = Ttorm.manager().register.get(identifier, parameter ?? TtormParameter.empty());
+    Widget? page = Ttorm.manager().register.get(identifier, parameter ?? TtormParameter.empty());
     if (page == null) {
-      var identifier = await Ttorm.manager().channel.invokeMethod("get_all_register_identifiers");
-      if (identifier! is List<String>) {
+      var appModelIdentifiers = await Ttorm.manager().register.appModelIdentifiers();
+      if (appModelIdentifiers.contains(identifier)) {
         assert(false, "$identifier没有实现");
       } else {}
     } else {

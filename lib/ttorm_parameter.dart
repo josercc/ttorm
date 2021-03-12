@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class TtormParameter {
   final Map<String, dynamic> parameter;
   TtormParameter(this.parameter);
@@ -16,5 +18,9 @@ class TtormParameter {
 
   T getLate<T>(String key, T defaultValue) {
     return get(key) ?? defaultValue;
+  }
+
+  String toJson() {
+    return json.encode(parameter);
   }
 }
