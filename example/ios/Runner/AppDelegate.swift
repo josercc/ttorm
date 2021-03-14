@@ -16,7 +16,7 @@ import ttorm
         register.register(AViewController.self)
         register.register(BViewController.self)
     }
-    Ttorm.manager.runApp(root: TtormIdentifier("APage")) { (root) in
+    Ttorm.manager.runApp(TtormIdentifier("BPage")) { (root) in
         self.window = UIWindow(frame: UIScreen.main.bounds)
         self.window.rootViewController = root
         self.window.makeKeyAndVisible()

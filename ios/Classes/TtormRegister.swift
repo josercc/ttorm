@@ -20,8 +20,7 @@ public class TtormRegister {
     public func register<T:TtormModule>(_ controller:T.Type, _ identifier:TtormIdentifier? = nil) {
         let ttormIdentifier = (identifier != nil) ? identifier!.identifier : "\(controller)"
         /// 获取Flutter端已经注册路由
-        let flutterModuleIdentifiers = UserDefaults.standard.object(forKey: "flutterModuleIdentifiers") as? [String] ?? []
-        guard !flutterModuleIdentifiers.contains(ttormIdentifier) else {
+        guard !allRegisterIdentifiers.contains(ttormIdentifier) else {
             assert(false,"\(ttormIdentifier)registered on the flutter side")
             return
         }
@@ -29,11 +28,15 @@ public class TtormRegister {
             return T.ttormMakeController(parameter: parameter)
         }
         self.registerMap[ttormIdentifier] = makeControllerHandle
-        UserDefaults.standard.setValue(self.allRegisterIdentifiers, forKey: "appModelIdentifiers")
-        UserDefaults.standard.synchronize()
     }
     
-    public func getController(_ identifier:TtormIdentifier, _ parameter:TtormParameter) -> UIViewController? {
+    /// 通过路由标识符获取对应的`UIViewController`
+    /// - Parameters:
+    ///   - identifier: 路由的标识符
+    ///   - parameter: 路由的参数
+    /// - Returns: 可选`UIViewController`
+    public func getController(_ identifier:TtormIdentifier,
+                              _ parameter:TtormParameter) -> UIViewController? {
         if allRegisterIdentifiers.contains(identifier.identifier) {
             guard let handle = self.registerMap[identifier.identifier] else {
                 assert(false,"\(identifier.identifier)没有注册")
@@ -41,22 +44,28 @@ public class TtormRegister {
             }
             return handle(parameter)
         } else {
-            let route = "/\(identifier.identifier)?arguments=\(parameter.toJSON() ?? "")"
-            let engine = ttormFlutterEngineGroup.makeEngine(withEntrypoint: "main", libraryURI: nil)
-            engine.run(withEntrypoint: nil, initialRoute: "/APage")
-            let flutterController = FlutterViewController(engine: engine, nibName: nil, bundle: nil)
-//            flutterController.pushRoute("/APage")
-            Ttorm.manager.ttormChannel = FlutterMethodChannel(name: "Ttorm", binaryMessenger: flutterController.binaryMessenger)
+            guard var urlComponment = URLComponents(string: "TtormRoutes://") else {
+                return nil
+            }
+            urlComponment.queryItems = [
+                URLQueryItem(name: "name", value: identifier.identifier),
+                URLQueryItem(name: "arguments", value: parameter.toJSON() ?? "")
+            ]
+            guard let initialRoute = urlComponment.url?.absoluteString else {
+                return nil
+            }
+            let precompiledDartBundle = Bundle(identifier: FlutterDartProject.defaultBundleIdentifier())
+            let flutterDartProject = FlutterDartProject(precompiledDartBundle:precompiledDartBundle)
+            let flutterController = FlutterViewController(project: flutterDartProject,
+                                                          initialRoute: initialRoute,
+                                                          nibName: nil,
+                                                          bundle: nil)
             return flutterController
         }
     }
-    
+    /// 获取原生所有的注册路由
     public var allRegisterIdentifiers:[String] {
         return self.registerMap.map({$0.key})
-    }
-    
-    public var flutterModuleIdentifiers:[String] {
-        return UserDefaults.standard.object(forKey: "flutterModuleIdentifiers") as? [String] ?? []
     }
 }
 

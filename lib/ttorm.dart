@@ -1,12 +1,13 @@
-import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ttorm/ttorm_identifier.dart';
+import 'package:ttorm/ttorm_navigator.dart';
 import 'package:ttorm/ttorm_navigator_paramater.dart';
+import 'package:ttorm/ttorm_parameter.dart';
 import 'package:ttorm/ttorm_register.dart';
-import 'package:ttorm/ttorm_user_default.dart';
 
 typedef TtormRunEngineAppHandle = Widget Function(StatefulWidget child);
 
@@ -15,6 +16,7 @@ class Ttorm {
   final TtormRegister register;
   static Ttorm? _ttorm;
   final MethodChannel channel;
+  BuildContext? _context;
   Ttorm()
       : register = TtormRegister(),
         channel = MethodChannel('ttorm') {
@@ -24,13 +26,15 @@ class Ttorm {
           assert(false, "${call.method}没有带任何参数或者参数不是JSON Text");
           return;
         }
-        TtormNavigatorParamater navigatorParamater = TtormNavigatorParamater.from(call.arguments);
+        TtormNavigatorParamater navigatorParamater =
+            TtormNavigatorParamater.from(call.arguments);
         if (navigatorParamater.identifier == null) {
           assert(false, "没有传递模块的标识符");
           return;
         }
-        if (call.method == "push") {
-          // TtormNavigator.push(TtormIdentifier(navigatorParamater.identifier!), BuildContext());
+        if (call.method == "push" && _context != null) {
+          TtormNavigator.push(
+              TtormIdentifier(navigatorParamater.identifier!), _context!);
         }
       }
     });
@@ -46,27 +50,27 @@ class Ttorm {
     registerHandle(register);
   }
 
-  Future<String?> _runFlutterViewParameter() async {
-    return await TtormUserDefault.getValue("runFlutterView");
-  }
-
-  void runApp(Function(Widget child) handle) async {
-    String? runFlutterViewParameter = await _runFlutterViewParameter();
-    print("runFlutterViewParameter $runFlutterViewParameter");
-    if (runFlutterViewParameter == null) {
-      assert(false, "runFlutterView没有执行");
-      return;
+  Widget? runApp(
+    String route,
+    BuildContext context,
+  ) {
+    _context = context;
+    Uri uri = Uri.parse(route);
+    String? name = uri.queryParameters["name"];
+    String? arguments = uri.queryParameters["arguments"];
+    if (name == null) {
+      assert(false, "没有设置name参数");
+      return null;
     }
 
-    TtormNavigatorParamater navigatorParamater = TtormNavigatorParamater.from(runFlutterViewParameter);
-    if (navigatorParamater.identifier == null) {
-      assert(false, "请跳转Flutter前调用runFlutterView方法和设置跳转参数");
-      return;
-    }
-    var child = register.get(TtormIdentifier(navigatorParamater.identifier!), navigatorParamater.parameter);
+    var child = register.get(
+        TtormIdentifier(name),
+        arguments == null
+            ? TtormParameter.empty()
+            : TtormParameter.fromDynamicMap(json.decode(arguments)));
     if (child == null) {
-      assert(false, "${navigatorParamater.identifier!}路由不存在");
+      assert(false, "$name路由不存在");
     }
-    handle(child!);
+    return child;
   }
 }

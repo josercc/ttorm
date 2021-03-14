@@ -8,7 +8,7 @@
 import Foundation
 /// 模块跳转传递的参数
 public class TtormParameter {
-    
+    /// 获取模块跳转参数字典
     public let parameter:[String:Any]
     
     /// 初始化
@@ -28,6 +28,8 @@ public class TtormParameter {
         self.parameter = map
     }
     
+    /// 通过一个JSON字符串吃实话
+    /// - Parameter json: JSON字符串
     public init(_ json:String) {
         guard let data = json.data(using: .utf8),
               let map = try? JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed) as? [String:Any] else {
@@ -56,10 +58,13 @@ public class TtormParameter {
         return value
     }
     
+    /// 通过Key值获取对应的参数 可以设置默认值
     subscript<T>(key:String, defaultValue:T) -> T {
         return self[key] ?? defaultValue
     }
     
+    /// 将模块参数转换为JSON 字符串
+    /// - Returns: JSON字符串
     public func toJSON() -> String? {
         guard let data = try? JSONSerialization.data(withJSONObject: parameter, options: .fragmentsAllowed),
               let jsonText = String(data: data, encoding: .utf8) else {

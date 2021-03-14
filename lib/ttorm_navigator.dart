@@ -19,12 +19,10 @@ class TtormNavigator {
     TtormParameter? parameter,
     bool animation = true,
   }) async {
-    Widget? page = Ttorm.manager().register.get(identifier, parameter ?? TtormParameter.empty());
+    Widget? page = Ttorm.manager()
+        .register
+        .get(identifier, parameter ?? TtormParameter.empty());
     if (page == null) {
-      var appModelIdentifiers = await Ttorm.manager().register.appModelIdentifiers();
-      if (appModelIdentifiers.contains(identifier)) {
-        assert(false, "$identifier没有实现");
-      } else {}
     } else {
       if (Platform.isIOS) {
         Navigator.push(context, CupertinoPageRoute(builder: (context) => page));
