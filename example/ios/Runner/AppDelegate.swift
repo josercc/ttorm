@@ -15,8 +15,9 @@ import ttorm
     Ttorm.manager.initRoute { (register) in
         register.register(AViewController.self)
         register.register(BViewController.self)
+        register.register(TabBarController.self)
     }
-    Ttorm.manager.runApp(TtormIdentifier("BPage")) { (root) in
+    Ttorm.manager.runApp(TtormIdentifier("TabBarController")) { (root) in
         self.window = UIWindow(frame: UIScreen.main.bounds)
         self.window.rootViewController = root
         self.window.makeKeyAndVisible()

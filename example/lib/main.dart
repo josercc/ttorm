@@ -7,7 +7,8 @@ import 'package:ttorm_example/b_page.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   Ttorm.manager().initModule((register) {
-    register.register(TtormIdentifier("APage"), (parameter) => APage());
+    register.register(TtormIdentifier("APage"),
+        (parameter) => APage(name: parameter.getLate("name", "Hello World")));
     register.register(TtormIdentifier("BPage"), (parameter) => BPage());
   });
   runApp(MaterialApp(onGenerateRoute: (setting) {

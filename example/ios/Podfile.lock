@@ -4,11 +4,17 @@ PODS:
     - Flutter
   - ttorm (0.0.1):
     - Flutter
+  - WoodPeckeriOS (1.2.92)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - ttorm (from `.symlinks/plugins/ttorm/ios`)
+  - WoodPeckeriOS
+
+SPEC REPOS:
+  trunk:
+    - WoodPeckeriOS
 
 EXTERNAL SOURCES:
   Flutter:
@@ -22,7 +28,8 @@ SPEC CHECKSUMS:
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   ttorm: 51922429761b0e73281942bb34676737b2976ef3
+  WoodPeckeriOS: 29f6fb07de24c8c8716b56a8764876a739c6e8e3
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: b24b86dc79ca26b3e3bffff2108b8ac11d020a62
 
 COCOAPODS: 1.10.0
