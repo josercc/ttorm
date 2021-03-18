@@ -15,30 +15,9 @@ typedef TtormRunEngineAppHandle = Widget Function(StatefulWidget child);
 class Ttorm {
   final TtormRegister register;
   static Ttorm? _ttorm;
-  final MethodChannel channel;
+  MethodChannel? channel;
   BuildContext? _context;
-  Ttorm()
-      : register = TtormRegister(),
-        channel = MethodChannel('ttorm') {
-    channel.setMethodCallHandler((call) async {
-      if (call.method == "push" || call.method == "present") {
-        if (call.arguments == null || call.arguments is! String) {
-          assert(false, "${call.method}没有带任何参数或者参数不是JSON Text");
-          return;
-        }
-        TtormNavigatorParamater navigatorParamater =
-            TtormNavigatorParamater.from(call.arguments);
-        if (navigatorParamater.identifier == null) {
-          assert(false, "没有传递模块的标识符");
-          return;
-        }
-        if (call.method == "push" && _context != null) {
-          TtormNavigator.push(
-              TtormIdentifier(navigatorParamater.identifier!), _context!);
-        }
-      }
-    });
-  }
+  Ttorm() : register = TtormRegister();
   static Ttorm manager() {
     if (_ttorm == null) {
       _ttorm = Ttorm();
@@ -58,16 +37,30 @@ class Ttorm {
     Uri uri = Uri.parse(route);
     String? name = uri.queryParameters["name"];
     String? arguments = uri.queryParameters["arguments"];
-    if (name == null) {
-      assert(false, "没有设置name参数");
+    String? channelName = uri.queryParameters["channel"];
+    if (name == null || channelName == null) {
+      assert(false, "没有设置name参数 或者没有设置channel");
       return null;
     }
-
-    var child = register.get(
-        TtormIdentifier(name),
-        arguments == null
-            ? TtormParameter.empty()
-            : TtormParameter.fromDynamicMap(json.decode(arguments)));
+    channel = MethodChannel(channelName);
+    channel?.setMethodCallHandler((call) async {
+      if (call.method == "push" || call.method == "present") {
+        if (call.arguments == null || call.arguments is! String) {
+          assert(false, "${call.method}没有带任何参数或者参数不是JSON Text");
+          return;
+        }
+        TtormNavigatorParamater navigatorParamater = TtormNavigatorParamater.from(call.arguments);
+        if (navigatorParamater.identifier == null) {
+          assert(false, "没有传递模块的标识符");
+          return;
+        }
+        if (call.method == "push" && _context != null) {
+          TtormNavigator.push(TtormIdentifier(navigatorParamater.identifier!), _context!);
+        }
+      }
+    });
+    var child = register.get(TtormIdentifier(name),
+        arguments == null ? TtormParameter.empty() : TtormParameter.fromDynamicMap(json.decode(arguments)));
     if (child == null) {
       assert(false, "$name路由不存在");
     }

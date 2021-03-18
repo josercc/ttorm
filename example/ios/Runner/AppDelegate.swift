@@ -9,9 +9,7 @@ import ttorm
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
 
-    GeneratedPluginRegistrant.register(with: self)
 
-    
     Ttorm.manager.initRoute { (register) in
         register.register(AViewController.self)
         register.register(BViewController.self)
@@ -23,6 +21,7 @@ import ttorm
         self.window.makeKeyAndVisible()
     }
     
+    GeneratedPluginRegistrant.register(with: self)
 
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

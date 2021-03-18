@@ -47,9 +47,11 @@ public class TtormRegister {
             guard var urlComponment = URLComponents(string: "TtormRoutes://") else {
                 return nil
             }
+            let channel = "ttorm_\(Int(Date().timeIntervalSince1970 * 1000))"
             urlComponment.queryItems = [
                 URLQueryItem(name: "name", value: identifier.identifier),
-                URLQueryItem(name: "arguments", value: parameter.toJSON() ?? "")
+                URLQueryItem(name: "arguments", value: parameter.toJSON() ?? ""),
+                URLQueryItem(name: "channel", value: channel)
             ]
             guard let initialRoute = urlComponment.url?.absoluteString else {
                 return nil
@@ -60,6 +62,28 @@ public class TtormRegister {
                                                           initialRoute: initialRoute,
                                                           nibName: nil,
                                                           bundle: nil)
+            let methodChannel = FlutterMethodChannel(name: channel, binaryMessenger: flutterController.binaryMessenger)
+            methodChannel.setMethodCallHandler { (call, result) in
+                if call.method == TtormMethodName.push.rawValue {
+                    guard let jsonText = call.arguments as? String else {
+                        assert(false,"\(TtormMethodName.push.rawValue)method 参数必须是JSON")
+                        return
+                    }
+                    let parameter = TtormParameter(jsonText)
+                    guard let name:String = parameter["name"] else {
+                        assert(false,"没有设置\(TtormMethodName.push.rawValue)的模块名称")
+                        return
+                    }
+                    guard let _parameter:[String:Any] = parameter["parameter"] else {
+                        assert(false,"没有设置\(TtormMethodName.push.rawValue)的参数")
+                        return
+                    }
+                    let animated = parameter["animated",true]
+                    TtormNavigator.push(TtormIdentifier(name), TtormParameter(_parameter), animated)
+                } else {
+                    result(FlutterMethodNotImplemented)
+                }
+            }
             return flutterController
         }
     }

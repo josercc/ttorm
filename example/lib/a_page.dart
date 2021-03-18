@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:ttorm/ttorm.dart';
 import 'package:ttorm/ttorm_identifier.dart';
 import 'package:ttorm/ttorm_navigator.dart';
 
@@ -15,16 +14,22 @@ class _APageState extends State<APage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(widget.name),
-          TextButton(
-            onPressed: () =>
-                TtormNavigator.push(TtormIdentifier("APage"), context),
-            child: Text("跳转到FlutterB"),
-          ),
-        ],
+      body: Container(
+        width: double.infinity,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(widget.name),
+            TextButton(
+              onPressed: () => TtormNavigator.push(TtormIdentifier("APage"), context),
+              child: Text("跳转到FlutterB"),
+            ),
+            TextButton(
+              onPressed: () => TtormNavigator.push(TtormIdentifier("AViewController"), context),
+              child: Text("跳转到NativeA"),
+            ),
+          ],
+        ),
       ),
     );
   }

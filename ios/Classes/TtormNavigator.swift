@@ -22,5 +22,5 @@ public class TtormNavigator {
             navigationController?.pushViewController(controller, animated: animated)
         }
     }
-
+        
 }

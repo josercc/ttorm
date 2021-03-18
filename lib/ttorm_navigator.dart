@@ -17,12 +17,17 @@ class TtormNavigator {
     TtormIdentifier identifier,
     BuildContext context, {
     TtormParameter? parameter,
-    bool animation = true,
+    bool animated = true,
   }) async {
-    Widget? page = Ttorm.manager()
-        .register
-        .get(identifier, parameter ?? TtormParameter.empty());
+    parameter = parameter ?? TtormParameter.empty();
+    Widget? page = Ttorm.manager().register.get(identifier, parameter);
     if (page == null) {
+      TtormParameter _parameter = TtormParameter({
+        "name": identifier.identifier,
+        "parameter": parameter.parameter,
+        "animated": animated,
+      });
+      Ttorm.manager().channel?.invokeMethod("push", _parameter.toJson());
     } else {
       if (Platform.isIOS) {
         Navigator.push(context, CupertinoPageRoute(builder: (context) => page));
